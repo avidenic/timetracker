@@ -113,20 +113,22 @@ function import($class_name) {
 	}
 
 	function &getConnection() {
-        if (!isset($GLOBALS["_MDB2_CONNECTION"])) {
+      if (!isset($GLOBALS["_MDB2_CONNECTION"])) {
 
-        	require_once('MDB2.php');
+        require_once('MDB2.php');
 
-        	$mdb2 = MDB2::connect(DSN);
-			if (is_a($mdb2, 'PEAR_Error')) {
-    			die($mdb2->getMessage());
-			}
+        $mdb2 = MDB2::connect(DSN);
 
-			$mdb2->setFetchMode(MDB2_FETCHMODE_ASSOC);
-			
-   			$GLOBALS["_MDB2_CONNECTION"] = $mdb2;
-    	}
-      	return $GLOBALS["_MDB2_CONNECTION"];
+        if (is_a($mdb2, 'PEAR_Error')) {
+            die($mdb2->getMessage());
+        }
+
+			  $mdb2->setFetchMode(MDB2_FETCHMODE_ASSOC);			
+        $GLOBALS["_MDB2_CONNECTION"] = $mdb2;
+       
+      }
+      
+      return $GLOBALS["_MDB2_CONNECTION"];
 	}
 
 

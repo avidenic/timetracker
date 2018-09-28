@@ -214,6 +214,7 @@ $i18n_key_words = array(
 'label.work_units' => 'Единицы работы',
 'label.work_units_short' => 'Единицы',
 'label.totals_only' => 'Только итоги',
+// 'label.audit_log' => 'Audit log',
 
 // Form titles.
 'title.login' => 'Вход в систему',

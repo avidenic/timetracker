@@ -214,6 +214,7 @@ $i18n_key_words = array(
 'label.work_units' => 'Arbeitseinheiten',
 'label.work_units_short' => 'Einheiten',
 'label.totals_only' => 'Nur Gesamtstunden',
+// 'label.audit_log' => 'Audit log',
 
 // Form titles.
 'title.login' => 'Anmelden',

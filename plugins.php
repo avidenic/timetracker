@@ -54,6 +54,7 @@ if ($request->isPost()) {
   $cl_quotas = $request->getParameter('quotas');
   $cl_week_view = $request->getParameter('week_view');
   $cl_work_units = $request->getParameter('work_units');
+  $cl_audit_log = $request->getParameter('audit_log');
 } else {
   // Which plugins do we have enabled?
   $plugins = explode(',', $user->plugins);
@@ -70,6 +71,7 @@ if ($request->isPost()) {
   $cl_quotas = in_array('mq', $plugins);
   $cl_week_view = in_array('wv', $plugins);
   $cl_work_units = in_array('wu', $plugins);
+  $cl_audit_log = in_array('al', $plugins);
 }
 
 $form = new Form('pluginsForm');
@@ -88,7 +90,7 @@ $form->addInput(array('type'=>'checkbox','name'=>'locking','value'=>$cl_locking,
 $form->addInput(array('type'=>'checkbox','name'=>'quotas','value'=>$cl_quotas,'onchange'=>'handlePluginCheckboxes()'));
 $form->addInput(array('type'=>'checkbox','name'=>'week_view','value'=>$cl_week_view,'onchange'=>'handlePluginCheckboxes()'));
 $form->addInput(array('type'=>'checkbox','name'=>'work_units','value'=>$cl_work_units,'onchange'=>'handlePluginCheckboxes()'));
-
+$form->addInput(array('type'=>'checkbox','name'=>'audit_log','value'=>$cl_audit_log));
 $form->addInput(array('type'=>'submit','name'=>'btn_save','value'=>$i18n->get('button.save')));
 
 if ($request->isPost()) {
@@ -123,6 +125,8 @@ if ($request->isPost()) {
       $plugins .= ',wv';
     if ($cl_work_units)
       $plugins .= ',wu';
+    if ($cl_audit_log)
+      $plugins .= ',al';
 
     // Recycle week view plugin options as they are not configured on this page.
     $existing_plugins = explode(',', $user->plugins);

@@ -250,6 +250,7 @@ $i18n_key_words = array(
 // 'label.work_units' => 'Work units',
 // 'label.work_units_short' => 'Units',
 'labl.totals_only' => 'סיכומים בלבד',
+// 'label.audit_log' => 'Audit log',
 
 // Form titles.
 'title.login' => 'כניסה',

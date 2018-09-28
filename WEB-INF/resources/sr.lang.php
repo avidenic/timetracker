@@ -231,6 +231,7 @@ $i18n_key_words = array(
 // 'label.week_list' => 'Week list',
 // 'label.work_units' => 'Work units',
 'label.totals_only' => 'Samo zbirno',
+// 'label.audit_log' => 'Audit log',
 
 // Form titles.
 'title.login' => 'Prijava',

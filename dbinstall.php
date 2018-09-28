@@ -173,7 +173,7 @@ if ($request->isGet()) {
 if ($_POST) {
   print "Processing...<br>\n";
 
-  if ($_POST["crstructure"]) {
+  if (isset($_POST["crstructure"])) {
     $sqlQuery = join("\n", file("mysql.sql"));
     $sqlQuery = str_replace("TYPE=MyISAM","",$sqlQuery);
     $queries  = explode(";",$sqlQuery);
@@ -187,7 +187,7 @@ if ($_POST) {
     }
   }
 
-  if ($_POST["convert5to7"]) {
+  if (isset($_POST["convert5to7"])) {
     setChange("alter table `activity_log` CHANGE al_comment al_comment text");
     setChange("CREATE TABLE `sysconfig` (`sysc_id` int(11) unsigned NOT NULL auto_increment,`sysc_name` varchar(32) NOT NULL default '',`sysc_value` varchar(70) default NULL, PRIMARY KEY  (`sysc_id`), UNIQUE KEY `sysc_id` (`sysc_id`), UNIQUE KEY `sysc_name` (`sysc_name`))");
     setChange("alter table `companies` add c_locktime int(4) default -1");
@@ -201,7 +201,7 @@ if ($_POST) {
     setChange("alter table users drop `u_aprojects`");
   }
 
-  if ($_POST["convert7to133"]) {
+  if (isset($_POST["convert7to133"])) {
     setChange("ALTER TABLE users ADD COLUMN u_lang VARCHAR(20) DEFAULT NULL");
     setChange("ALTER TABLE users ADD COLUMN u_email VARCHAR(100) DEFAULT NULL");
     setChange("ALTER TABLE `activity_log` drop `al_proof`");
@@ -216,7 +216,7 @@ if ($_POST) {
 
   // The update_projects function updates p_activities field in the projects table so that we could
   // improve performance of the application by using this field instead of activity_bind table.
-  if ($_POST["update_projects"]) {
+  if (isset($_POST["update_projects"])) {
     $mdb2 = getConnection();
     // $sql = "select p_id from projects where p_status = 1 and p_activities is NULL";
     $sql = "select p_id from projects where p_status = 1";
@@ -253,7 +253,7 @@ if ($_POST) {
     }
   }
 
-  if ($_POST["convert133to1340"]) {
+  if (isset($_POST["convert133to1340"])) {
     setChange("ALTER TABLE companies ADD COLUMN c_show_pie smallint(2) DEFAULT 1");
     setChange("ALTER TABLE companies ADD COLUMN c_pie_mode smallint(2) DEFAULT 1");
     setChange("ALTER TABLE companies ADD COLUMN c_lang varchar(20) default NULL");
@@ -261,7 +261,7 @@ if ($_POST) {
 
   // The update_companies function sets up c_show_pie, c_pie_mode, and c_lang
   // fields in the companies table from the corresponding manager fields. 
-  if ($_POST["update_companies"]) {
+  if (isset($_POST["update_companies"])) {
     $mdb2 = getConnection();
     // Get all active managers.
     $sql = "select u_company_id, u_show_pie, u_pie_mode, u_lang from users
@@ -288,7 +288,7 @@ if ($_POST) {
     }
   }
 
-  if ($_POST["convert1340to1485"]) {
+  if (isset($_POST["convert1340to1485"])) {
     setChange("ALTER TABLE users DROP u_show_pie");
     setChange("ALTER TABLE users DROP u_pie_mode");
     setChange("ALTER TABLE users DROP u_lang");
@@ -393,7 +393,7 @@ if ($_POST) {
   }
 
   // The update_to_team_id function sets team_id field projects, activities, and clients tables.
-  if ($_POST["update_to_team_id"]) {
+  if (isset($_POST["update_to_team_id"])) {
     $mdb2 = getConnection();
 
     // Update projects.
@@ -490,7 +490,7 @@ if ($_POST) {
     print "Updated $clients_updated clients...<br>\n";
   }
 
-  if ($_POST["convert1485to1579"]) {
+  if (isset($_POST["convert1485to1579"])) {
     setChange("ALTER TABLE tt_fav_reports MODIFY id int(11) NOT NULL auto_increment");
     setChange("RENAME TABLE clients TO tt_clients");
     setChange("ALTER TABLE tt_clients CHANGE clnt_id id int(11) NOT NULL AUTO_INCREMENT");
@@ -597,7 +597,7 @@ if ($_POST) {
     setChange("create index invoice_idx on tt_log(invoice_id)");
   }
 
-  if ($_POST["convert1579to1600"]) {
+  if (isset($_POST["convert1579to1600"])) {
     setChange("ALTER TABLE tt_invoices ADD COLUMN date date NOT NULL");
     setChange("ALTER TABLE tt_teams ADD COLUMN custom_logo tinyint(4) default '0'");
     setChange("ALTER TABLE tt_tasks ADD COLUMN description varchar(255) default NULL");
@@ -615,7 +615,7 @@ if ($_POST) {
   }
 
   // The update_clients function updates projects field in tt_clients table.
-  if ($_POST["update_clients"]) {
+  if (isset($_POST["update_clients"])) {
     $mdb2 = getConnection();
     $sql = "select id from tt_clients where status = 1 or status = 0";
     $res = $mdb2->query($sql);
@@ -654,7 +654,7 @@ if ($_POST) {
   }
 
   // The update_custom_fields function updates option_id field field in tt_custom_field_log table.
-  if ($_POST['update_custom_fields']) {
+  if (isset($_POST['update_custom_fields'])) {
     $mdb2 = getConnection();
     $sql = "update tt_custom_field_log set option_id = value where field_id in (select id from tt_custom_fields where type = 2)";
     $affected = $mdb2->exec($sql);
@@ -665,7 +665,7 @@ if ($_POST) {
   }
 
   // The update_tracking_mode function sets the tracking_mode field in tt_teams table to 2 (== MODE_PROJECTS_AND_TASKS).
-  if ($_POST['update_tracking_mode']) {
+  if (isset($_POST['update_tracking_mode'])) {
     $mdb2 = getConnection();
     $sql = "update tt_teams set tracking_mode = 2 where tracking_mode = 0";
     $affected = $mdb2->exec($sql);
@@ -675,7 +675,7 @@ if ($_POST) {
     print "Updated $affected teams...<br>\n";
   }
 
-  if ($_POST["convert1600to11400"]) {
+  if (isset($_POST["convert1600to11400"])) {
     setChange("DROP TABLE IF EXISTS tt_invoice_headers");
     setChange("ALTER TABLE tt_fav_reports ADD COLUMN `client_id` int(11) default NULL");
     setChange("ALTER TABLE tt_fav_reports ADD COLUMN `cf_1_option_id` int(11) default NULL");
@@ -723,7 +723,7 @@ if ($_POST) {
     setChange("ALTER TABLE `tt_log` ADD `paid` tinyint(4) NULL default '0' AFTER `billable`");
   }
 
-  if ($_POST["convert11400to11744"]) {
+  if (isset($_POST["convert11400to11744"])) {
     setChange("ALTER TABLE `tt_teams` DROP `address`");
     setChange("ALTER TABLE `tt_fav_reports` ADD `report_spec` text default NULL AFTER `user_id`");
     setChange("ALTER TABLE `tt_fav_reports` ADD `paid_status` tinyint(4) default NULL AFTER `invoice`");
@@ -766,7 +766,7 @@ if ($_POST) {
   }
 
   // The update_role_id function assigns a role_id to users, who don't have it.
-  if ($_POST['update_role_id']) {
+  if (isset($_POST['update_role_id'])) {
     import('I18n');
 
     $mdb2 = getConnection();
@@ -805,7 +805,7 @@ if ($_POST) {
     print "Updated $users_updated users...<br>\n";
   }
 
-  if ($_POST["convert11744to11797"]) {
+  if (isset($_POST["convert11744to11797"])) {
     setChange("update `tt_roles` inner join `tt_site_config` sc on (sc.param_name = 'version_db' and sc.param_value = '1.17.44') set rights = replace(rights, 'override_punch_mode,override_date_lock', 'override_punch_mode,override_own_punch_mode,override_date_lock')");
     setChange("UPDATE `tt_site_config` SET param_value = '1.17.48' where param_name = 'version_db' and param_value = '1.17.44'");
     setChange("update `tt_users` inner join `tt_site_config` sc on (sc.param_name = 'version_db' and sc.param_value = '1.17.48') set role_id = (select id from tt_roles where team_id = 0 and rank = 512) where role = 324");
@@ -909,8 +909,16 @@ if ($_POST) {
     setChange("UPDATE `tt_site_config` SET param_value = '1.17.97', modified = now() where param_name = 'version_db' and param_value = '1.17.96'");
   }
 
+  if (isset($_POST["convert11797to1180"])) {
+    setChange("CREATE TABLE `tt_audit_log` (`id` int(11) NOT NULL AUTO_INCREMENT, `user_id` int(11) NOT NULL, `state` varchar(6) NOT NULL, `table_name` varchar(255) NOT NULL, `old_json` text default NULL, `new_json` text default NULL, `identity` text default NULL, `timestamp` DATETIME NOT NULL, PRIMARY KEY  (`id`))");
+    setChange("create index user_idx on tt_audit_log(user_id)");
+    setChange("create index table_namex on tt_audit_log(table_name)");
+    setChange("ALTER TABLE `tt_audit_log` ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `tt_users`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT");
+    setChange("UPDATE `tt_site_config` SET param_value = '1.18', modified = now() where param_name = 'version_db' and param_value = '1.17.97'");
+  }
+
   // The update_group_id function updates group_id field in tt_log and tt_expense_items tables.
-  if ($_POST["update_group_id"]) {
+  if (isset($_POST["update_group_id"])) {
     $mdb2 = getConnection();
 
     $sql = "(select distinct user_id from tt_log where group_id is null) union distinct (select distinct user_id from tt_expense_items where group_id is null)";
@@ -956,7 +964,7 @@ if ($_POST) {
     print "Updated $tt_expense_items_updated tt_expense_items records...<br>\n";
   }
 
-  if ($_POST["cleanup"]) {
+  if (isset($_POST["cleanup"])) {
 
     $mdb2 = getConnection();
     $inactive_groups = ttTeamHelper::getInactiveGroups();
@@ -999,7 +1007,7 @@ if ($_POST) {
 <h2>DB Install</h2>
 <table width="80%" border="1" cellpadding="10" cellspacing="0">
   <tr>
-    <td width="80%"><b>Create database structure (v1.17.97)</b>
+    <td width="80%"><b>Create database structure (v1.18)</b>
     <br>(applies only to new installations, do not execute when updating)</br></td><td><input type="submit" name="crstructure" value="Create"></td>
   </tr>
 </table>
@@ -1038,9 +1046,13 @@ if ($_POST) {
     <td>Update database structure (v1.14 to v1.17.44)</td>
     <td><input type="submit" name="convert11400to11744" value="Update"><br><input type="submit" name="update_role_id" value="Update role_id"></td>
   </tr>
-    <tr valign="top">
+  <tr valign="top">
     <td>Update database structure (v1.17.44 to v1.17.97)</td>
     <td><input type="submit" name="convert11744to11797" value="Update"><br><input type="submit" name="update_group_id" value="Update group_id"></td>
+  </tr>  
+  <tr valign="top">
+    <td>Update database structure (v1.17.97 to v1.18)</td>
+    <td><input type="submit" name="convert11797to1180" value="Update"></td>
   </tr>
 </table>
 

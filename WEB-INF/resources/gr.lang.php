@@ -217,6 +217,7 @@ $i18n_key_words = array(
 // 'label.work_units' => 'Work units',
 // 'label.work_units_short' => 'Units',
 'label.totals_only' => 'Σύνολα μόνο',
+// 'label.audit_log' => 'Audit log',
 
 // Form titles.
 'title.login' => 'Σύνδεση',

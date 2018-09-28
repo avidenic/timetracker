@@ -214,6 +214,7 @@ $i18n_key_words = array(
 'label.work_units' => 'Werk eenheid',
 'label.work_units_short' => 'Eenheid',
 'label.totals_only' => 'Alleen totalen',
+// 'label.audit_log' => 'Audit log',
 
 // Form titles.
 'title.login' => 'Aanmelden',

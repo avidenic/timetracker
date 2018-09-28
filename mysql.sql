@@ -455,3 +455,26 @@ CREATE TABLE `tt_site_config` (
 );
 
 INSERT INTO `tt_site_config` (`param_name`, `param_value`, `created`) VALUES ('version_db', '1.17.97', now()); # TODO: change when structure changes.
+
+#
+# Structure for table tt_audit_log. This table stores audit data about user interactions
+# with Time Tracker, like adding, chaging and deleting records. 
+#
+CREATE TABLE `tt_audit_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT, # record id
+  `user_id` int(11) NOT NULL,           # user which was responsible for the change
+  `state` varchar(6) NOT NULL,          # does change indicate INSERT/UPDATE/DELETE
+  `table_name` varchar(255) NOT NULL,   # which table is effected
+  `old_json` text default NULL,         # serialized object from the row before the change
+  `new_json` text default NULL,         # serialized object from the row after the change
+  `identity` text default NULL,         # keys used in "where" statement
+  `timestamp` DATETIME NOT NULL,        # when did the change occur
+  PRIMARY KEY  (`id`)
+);
+
+# create index for better preformance when selecting by table name or user
+create index user_idx on tt_audit_log(user_id);
+create index table_namex on tt_audit_log(table_name);
+
+# add foreign key to user TABLE
+ALTER TABLE `tt_audit_log` ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `tt_users`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
