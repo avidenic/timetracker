@@ -403,41 +403,6 @@ class ttTimeHelper
     global $user;
     $audit = new ttAuditedChange("tt_log", $user);
 
-    // $tt_log = [];
-    // $tt_log['user_id'] = (int)$fields['user_id'];
-    // $tt_log['group_id'] = (int)$fields['group_id'];
-    // $tt_log['date'] = $fields['date'];
-    // $duration = isset($fields['duration']) ? $fields['duration'] : "";
-    // if ($duration) {
-    //   $minutes = ttTimeHelper::postedDurationToMinutes($fields['duration']);
-    //   $tt_log['duration'] = ttTimeHelper::minutesToDuration($minutes);
-    // } else {
-    //   $start = ttTimeHelper::to24HourFormat($fields['start']);
-    //   $finish = isset($fields['finish']) ? $fields['finish'] : "";
-
-    //   if ($finish) {
-    //     $finish = ttTimeHelper::to24HourFormat($finish);
-    //     if ('00:00' == $finish) $finish = '24:00';
-    //   }
-
-    //   $duration = ttTimeHelper::toDuration($start, $finish);
-    //   if ($duration === false) $duration = 0;
-    //   if (!$duration && ttTimeHelper::getUncompleted($user_id)) return false;
-
-    //   $tt_log['duration'] = $duration;
-    //   $tt_log['start'] = $start;
-    // }
-    // $tt_log['client_id'] = $fields['client'];
-    // $tt_log['project_id'] = $fields['project'];
-    // $tt_log['task_id'] = $fields['task'];
-    // $tt_log['invoice_id'] = $fields['invoice'];
-    // $tt_log['billable'] = $fileds['billable'];
-    // $tt_log['paid'] = $fields['paid'];
-    // $tt_log['comment'] = $fields['note'];
-    // if (array_key_exists('status', $fields)) { // Key exists and may be NULL during migration of data.
-    //   $tt_log['status'] = $fields['status'];
-    // }
-
     $tt_log = ttTimeHelper::map($fields, $user);
     $tt_log['created'] = date_create('now')->format('Y-m-d H:i:s'); // mysql date format
     $tt_log['created_ip'] = $_SERVER['REMOTE_ADDR'];
@@ -445,11 +410,6 @@ class ttTimeHelper
 
     $result = $audit->insert($tt_log, 'id');
     return $result;
-    // if (!$result) {
-    //   return $result;
-    // }
-    // $id = $audit->lastInsertID('tt_log', 'id');
-    // return $id;
   }
 
   // update - updates a record in log table. Does not update its custom fields.
@@ -467,7 +427,7 @@ class ttTimeHelper
     $tt_log['modified'] = date_create('now')->format('Y-m-d H:i:s'); // mysql date format
     $tt_log['modified_ip'] = $audit->quote($_SERVER['REMOTE_ADDR']);
     $tt_log['modified_by'] = $user->id;
-    $keys = array("id" => $fields['id']);
+    $keys = array('id' => $fields['id']);
     $result = $audit->update($tt_log, $keys);
     return $result;
   }
@@ -475,13 +435,21 @@ class ttTimeHelper
   // delete - deletes a record from tt_log table and its associated custom field values.
   static function delete($id, $user_id)
   {
+    global $user;
+    $audit = new ttAuditedChange('tt_log', $user);
+    $tt_log = array('status' => null);
+    $keys = array('id' => $id, 'user_id' => $user_id);
+    $res = $audit->update($tt_log, $keys);
+    if (!$res) {
+      return $res;
+    }
+    
+    // $sql = "update tt_log set status = NULL where id = $id and user_id = $user_id";
+    // $affected = $mdb2->exec($sql);
+    // if (is_a($affected, 'PEAR_Error'))
+    //   return false;
+    
     $mdb2 = getConnection();
-
-    $sql = "update tt_log set status = NULL where id = $id and user_id = $user_id";
-    $affected = $mdb2->exec($sql);
-    if (is_a($affected, 'PEAR_Error'))
-      return false;
-
     $sql = "update tt_custom_field_log set status = NULL where log_id = $id";
     $affected = $mdb2->exec($sql);
     if (is_a($affected, 'PEAR_Error'))
