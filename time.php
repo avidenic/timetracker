@@ -211,7 +211,7 @@ $form->addInput(array('type'=>'hidden','name'=>'browser_today','value'=>'')); //
 $form->addInput(array('type'=>'submit','name'=>'btn_submit','onclick'=>'browser_today.value=get_date()','value'=>$i18n->get('button.submit')));
 
 // If we have custom fields - add controls for them.
-if ($custom_fields && $custom_fields->fields[0]) {
+if (isset($custom_fields) && isset($custom_fields->fields[0])) {
   // Only one custom field is supported at this time.
   if ($custom_fields->fields[0]['type'] == CustomFields::TYPE_TEXT) {
     $form->addInput(array('type'=>'text','name'=>'cf_1','value'=>$cl_cf_1));
@@ -231,7 +231,7 @@ if ($request->isPost()) {
     // Validate user input.
     if ($user->isPluginEnabled('cl') && $user->isPluginEnabled('cm') && !$cl_client)
       $err->add($i18n->get('error.client'));
-    if ($custom_fields) {
+    if (isset($custom_fields)) {
       if (!ttValidString($cl_cf_1, !$custom_fields->fields[0]['required'])) $err->add($i18n->get('error.field'), $custom_fields->fields[0]['label']);
     }
     if (MODE_PROJECTS == $user->tracking_mode || MODE_PROJECTS_AND_TASKS == $user->tracking_mode) {

@@ -57,45 +57,80 @@ class ttAuditedChange
         $this->user = $user;
     }
 
-    function insert($values)
+    /**
+     * Inserts the object into database. Check parameter descriptions for usage     * 
+     * @param array a pair of named keys and values which should corespond to database columns
+     * @param string/array if supplied as a string, it should be the name of the autoincrement primary key. otherwise a named array of keys and values that corespond to primry key
+     */
+    function insert($values, $primaryKeys)
     {
-        return $this->execute($this->INSERT, $values, null);
+        // if primary key is supplied as a string it is assumed it is
+        // autoincrement. this should maybe be improved
+        return $this->execute($this->INSERT, $values, $primaryKeys);
     }
 
+    /**
+     * Delets a row from database.
+     * @param array an array of named keys and values, with which we can uniquely identify the row marked for deletion
+     * 
+     */
     function delete($keys)
     {
         return $this->execute($this->DELETE, null, $keys);
     }
 
+    /**
+     * Updates a row in the database
+     * @param array an array of named keys and values, which should corespond to table columns
+     * @param array an array of named keys and values, with which we can uniquely identify the row that is going to be updated
+     */
     function update($values, $keys)
     {
         return $this->execute($this->UPDATE, $values, $keys);
     }
 
+    /**
+     * A shortcut for MDB2->quote
+     * @param string value needed to be quoted
+     */
     function quote($value)
     {
         return $this->mdb2->quote($value);
     }
 
-    function lastInsertID($tableName, $fieldName)
+    /**
+     * A shortcut for MDB2->lastInsertID
+     * @param string name of autoincremented field
+     */
+    function lastInsertID($fieldName)
     {
-        return $this->mdb2->lastInsertID($tableName, $fieldName);
+        return $this->mdb2->lastInsertID($this->tableName, $fieldName);
     }
 
     private function execute($type, $values, $keys)
     {
         // TODO: add transaction
         $sql = $this->buildSql($type, $values, $keys);
+        
         $currentVersion = null;
         if ($type == "UPDATE" || $type == "DELETE") {
             $currentVersion = $this->getCurrent($keys);
         }
 
-        $res = $this->mdb2 . exec($sql);
+        $res = $this->mdb2->exec($sql);
         if (is_a($res, 'PEAR_Error')) {
             return false;
         }
+
         if ($this->user->isPluginEnabled('al')) {
+            // if $keys is string, it means it is autoincrement primary key
+            // so get it from DB
+            // TODO: possible race condition problem. check. 
+            if ($type == $this->INSERT && isset($keys) && is_string($keys)) {
+                $recordId = $this->lastInsertID($this->tableName, $keys);
+                $keys = array("$keys" => $recordId);
+                $res = $recordId;
+            }
             $this->addAudit($type, $values, $currentVersion, $keys);
         }
 
@@ -104,11 +139,13 @@ class ttAuditedChange
 
     private function getCurrent($keysArray)
     {
+        // get current recrod from DB.
         $query = "SELECT * FROM " . $this->tableName . " " . $this->buildCondition($keysArray);
 
-        $res = $this->mdb2 . query($query);
+        $res = $this->mdb2->query($query);
         if (!is_a($res, 'PEAR_Error')) {
-            return $res;
+            $val = $res->fetchRow();
+            return (object)$val;
         } else {
             return false;
         }
@@ -120,35 +157,48 @@ class ttAuditedChange
 
         if ($type == "INSERT") {
             $sql .= " INTO $this->tableName (";
-            $values = "values (";
+            $fieldValues = "values (";
             foreach ($values as $key => $value) {
                 $sql .= "$key, ";
-                $values .= "$value, ";
+
+                $value = $this->getValue($value);
+                $fieldValues .= "$value, ";
             }
             $sql = rtrim($sql, ", ");
-            $values = rtrim($values, ", ");
-            $sql .= ")" . $values . ")";
+            $fieldValues = rtrim($fieldValues, ", ");
+            $sql .= ") $fieldValues)";
             return $sql;
         }
 
         if ($type == "UPDATE") {
-            $sql .= " $this->tablenName SET";
+            $sql .= " $this->tableName SET ";
             foreach ($values as $key => $value) {
-                $sql .= "$key = $value, ";
+                $val = $this->getValue($value);
+                $sql .= "$key = $val, ";
             }
             $sql = rtrim($sql, ", ");
-            $sql .= $this->buildCondition($keys);
+            $sql .= " " . $this->buildCondition($keys);
 
             return $sql;
         }
 
         if ($type == "DELETE") {
-            $sql .= " FROM $this->tableName" . $this->buildCondition($keys);
+            $sql .= " FROM $this->tableName " . $this->buildCondition($keys);
 
             return $sql;
         }
 
         return false;
+    }
+
+    private function getValue($value)
+    {
+        if (!isset($value) || $value === "") {
+            $value = "NULL";
+        } else if (is_string($value)) {
+            $value = $this->quote($value);
+        }
+        return $value;
     }
 
     private function buildCondition($keys)
@@ -158,16 +208,12 @@ class ttAuditedChange
         if (empty($keys)) {
             return "";
         }
-        // allow user of this class to specify some other complex condition
-        if (is_string($keys)) {
-            $returnValue .= $keys;
-            return $returnValue;
-        }
 
         foreach ($keys as $key => $value) {
-            $returnValue = "$key = $value AND ";
+            $val = $this->getValue($value);
+            $returnValue .= "$key = $val AND ";
         }
-        $returnValue = trim($sql, " AND ");
+        $returnValue = trim($returnValue, " AND ");
 
         return $returnValue;
     }
@@ -181,14 +227,15 @@ class ttAuditedChange
         switch ($type) {
             case $this->INSERT:
                 $new = (object)[];
-                $currentAsJson = null;
+                $currentAsJson = "NULL";
                 break;
             case $this->UPDATE:
                 $currentAsJson = serialize($current);
                 $new = unserialize($currentAsJson);
+                $currentAsJson = $this->quote(json_encode($current));
                 break;
             case $this->DELETE:
-                $currentAsJson = serialize($current);
+                $currentAsJson = $this->quote(json_encode($current));
                 $new = null;
                 break;
         }
@@ -199,22 +246,33 @@ class ttAuditedChange
             }
         }
 
-        $newValueAsJson = serialize($new);
+        $newValueAsJson = $this->quote(json_encode($new));
 
         $identity = null;
 
         if (!empty($keys)) {
-            if (is_string($keys)) {
-                $identity = $keys;
-            } else {
-                $identityObject = (object)[];
-                foreach ($keys as $key => $value) {
-                    $identityObject->$key = $value;
-                }
-                $identity = serialize($identityObject);
+
+            $identityObject = (object)[];
+            foreach ($keys as $key => $value) {
+                $identityObject->$key = $this->getValue($value);
             }
+            $identity = json_encode($identityObject);
+
+            $identity = $this->quote($identity);
+        } else {
+            $identity = "NULL";
         }
 
-        $sql = "INSERT INTO tt_audit_log (user_id, state, table_name, old_json, new_json, identity, timestamp) values (" . $this->user->id . ", $type, $currentAsJson, $newValueAsJson, $identity, now());";
+        $type = $this->quote($type);
+        $tableName = $this->quote($this->tableName);
+
+        $sql = "INSERT INTO tt_audit_log (user_id, state, table_name, old_json, new_json, identity, timestamp) values (" . $this->user->id . ", $type, $tableName, $currentAsJson, $newValueAsJson, $identity, now());";
+
+        // TODO: atm this is secondary, inserting records is more important. so just swallow any sql exceptions.
+        // when transactions are implemented, return false
+        $res = $this->mdb2->exec($sql);
+        // if (is_a($res, 'PEAR_Error')) {
+        //     return false;
+        // }
     }
 }

@@ -325,7 +325,9 @@ class DateAndTime {
     // replace locale-dependent strings
     $format = str_replace('%a', mb_substr($i18n->getWeekDayName($this->mDay), 0, 3, 'utf-8'), $format);
     $format = str_replace('%A', $i18n->getWeekDayName($this->mDay), $format);
-    $abbrev_month = mb_substr($i18n->monthNames[$this->mMonth], 0, 3, 'utf-8');
+    if (isset($this->mMonth)){
+      $abbrev_month = mb_substr($i18n->monthNames[$this->mMonth], 0, 3, 'utf-8');
+    }
     $format = str_replace('%b', $abbrev_month, $format);
     $format = str_replace('%h', $abbrev_month, $format);
     $format = str_replace('%z', date('O'), $format);

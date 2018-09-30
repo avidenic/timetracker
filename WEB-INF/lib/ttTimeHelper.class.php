@@ -401,167 +401,75 @@ class ttTimeHelper
   static function insert($fields)
   {
     global $user;
-
-    // $mdb2 = getConnection();
-
-    // $user_id = (int) $fields['user_id'];
-    // $group_id = (int) $fields['group_id'];
-    // $date = $fields['date'];
-    // $start = $fields['start'];
-    // $finish = $fields['finish'];
-    // $duration = $fields['duration'];
-    // if ($duration) {
-    //   $minutes = ttTimeHelper::postedDurationToMinutes($duration);
-    //   $duration = ttTimeHelper::minutesToDuration($minutes);
-    // }
-    // $client = $fields['client'];
-    // $project = $fields['project'];
-    // $task = $fields['task'];
-    // $invoice = $fields['invoice'];
-    // $note = $fields['note'];
-    // $billable = $fields['billable'];
-    // $paid = $fields['paid'];
-    // if (array_key_exists('status', $fields)) { // Key exists and may be NULL during migration of data.
-    //   $status_f = ', status';
-    //   $status_v = ', '.$mdb2->quote($fields['status']);
-    // }
-
-    // $start = ttTimeHelper::to24HourFormat($start);
-    // if ($finish) {
-    //   $finish = ttTimeHelper::to24HourFormat($finish);
-    //   if ('00:00' == $finish) $finish = '24:00';
-    // }
-
-    // $created_v = ', now(), '.$mdb2->quote($_SERVER['REMOTE_ADDR']).', '.$mdb2->quote($user->id);
-
-    // if (!$billable) $billable = 0;
-    // if (!$paid) $paid = 0;
-
-
     $audit = new ttAuditedChange("tt_log", $user);
 
-    $tt_log = (object)[];
-    $tt_log['user_id'] = (int)$fields['user_id'];
-    $tt_log['group_id'] = (int)$fields['group_id'];
-    $tt_log['date'] = $audit->quote($fields['date']);
-
-    if (isset($fields['duration'])) {
-      $minutes = ttTimeHelper::postedDurationToMinutes($duration);
-      $tt_log['duration'] = ttTimeHelper::minutesToDuration($minutes);
-    } else {
-      $start = ttTimeHelper::to24HourFormat($fields['start']);
-      $finish = null;
-
-      if (isset(fields['finish'])) {
-        $finish = ttTimeHelper::to24HourFormat(fields['finish']);
-        if ('00:00' == $finish) $finish = '24:00';
-      }
-
-      $duration = ttTimeHelper::toDuration($start, $finish);
-      if ($duration === false) $duration = 0;
-      if (!$duration && ttTimeHelper::getUncompleted($user_id)) return false;
-
-      $tt_log['duration'] = $duration;
-      $tt_log['start'] = $start;
-    }
-    $tt_log['client'] = $audit->quote($fields['client']);
-    $tt_log['project'] = $audit->quote($fields['project']);
-    $tt_log['task'] = $audit->quote($fields['task']);
-    $tt_log['invoice'] = $audit->quote($fields['invoice']);
-    $tt_log['billable'] = $fileds['billable'];
-    $tt_log['paid'] = $fields['paid'];
-    $tt_log['created'] = "now()";
-    $tt_log['created_ip'] = $audit->quote($_SERVER['REMOTE_ADDR']);
-    $tt_log['created_by'] = $audit->quote($user->id);
-    if (array_key_exists('status', $fields)) { // Key exists and may be NULL during migration of data.
-      $tt_log['status'] = $audit->quote($fields['status']);
-    }
-
-    // if ($duration) {     
-
-    //   $sql = "insert into tt_log (user_id, group_id, date, duration, client_id, project_id, task_id, invoice_id, comment, billable, paid, created, created_ip, created_by $status_f) ".
-    //     "values ($user_id, $group_id, ".$mdb2->quote($date).", '$duration', ".$mdb2->quote($client).", ".$mdb2->quote($project).", ".$mdb2->quote($task).", ".$mdb2->quote($invoice).", ".$mdb2->quote($note).", $billable, $paid $created_v $status_v)";
-    //   $affected = $mdb2->exec($sql);
-    //   if (is_a($affected, 'PEAR_Error'))
-    //     return false;
+    // $tt_log = [];
+    // $tt_log['user_id'] = (int)$fields['user_id'];
+    // $tt_log['group_id'] = (int)$fields['group_id'];
+    // $tt_log['date'] = $fields['date'];
+    // $duration = isset($fields['duration']) ? $fields['duration'] : "";
+    // if ($duration) {
+    //   $minutes = ttTimeHelper::postedDurationToMinutes($fields['duration']);
+    //   $tt_log['duration'] = ttTimeHelper::minutesToDuration($minutes);
     // } else {
+    //   $start = ttTimeHelper::to24HourFormat($fields['start']);
+    //   $finish = isset($fields['finish']) ? $fields['finish'] : "";
+
+    //   if ($finish) {
+    //     $finish = ttTimeHelper::to24HourFormat($finish);
+    //     if ('00:00' == $finish) $finish = '24:00';
+    //   }
+
     //   $duration = ttTimeHelper::toDuration($start, $finish);
     //   if ($duration === false) $duration = 0;
     //   if (!$duration && ttTimeHelper::getUncompleted($user_id)) return false;
 
-    //   $sql = "insert into tt_log (user_id, group_id, date, start, duration, client_id, project_id, task_id, invoice_id, comment, billable, paid, created, created_ip, created_by $status_f) ".
-    //     "values ($user_id, $group_id, ".$mdb2->quote($date).", '$start', '$duration', ".$mdb2->quote($client).", ".$mdb2->quote($project).", ".$mdb2->quote($task).", ".$mdb2->quote($invoice).", ".$mdb2->quote($note).", $billable, $paid $created_v $status_v)";
-    //   $affected = $mdb2->exec($sql);
-    //   if (is_a($affected, 'PEAR_Error'))
-    //     return false;
+    //   $tt_log['duration'] = $duration;
+    //   $tt_log['start'] = $start;
     // }
-    // $id = $mdb2->lastInsertID('tt_log', 'id');
-    $result = $audit->insert($tt_log);
-    if (!$result) {
-      return $result;
-    }
-    $id = $audit->lastInsertID('tt_log', 'id');
-    return $id;
+    // $tt_log['client_id'] = $fields['client'];
+    // $tt_log['project_id'] = $fields['project'];
+    // $tt_log['task_id'] = $fields['task'];
+    // $tt_log['invoice_id'] = $fields['invoice'];
+    // $tt_log['billable'] = $fileds['billable'];
+    // $tt_log['paid'] = $fields['paid'];
+    // $tt_log['comment'] = $fields['note'];
+    // if (array_key_exists('status', $fields)) { // Key exists and may be NULL during migration of data.
+    //   $tt_log['status'] = $fields['status'];
+    // }
+
+    $tt_log = ttTimeHelper::map($fields, $user);
+    $tt_log['created'] = date_create('now')->format('Y-m-d H:i:s'); // mysql date format
+    $tt_log['created_ip'] = $_SERVER['REMOTE_ADDR'];
+    $tt_log['created_by'] = $user->id;
+
+    $result = $audit->insert($tt_log, 'id');
+    return $result;
+    // if (!$result) {
+    //   return $result;
+    // }
+    // $id = $audit->lastInsertID('tt_log', 'id');
+    // return $id;
   }
 
   // update - updates a record in log table. Does not update its custom fields.
   static function update($fields)
   {
     global $user;
-    $mdb2 = getConnection();
-
-    $id = $fields['id'];
-    $date = $fields['date'];
-    $user_id = $fields['user_id'];
-    $client = $fields['client'];
-    $project = $fields['project'];
-    $task = $fields['task'];
-    $start = $fields['start'];
-    $finish = $fields['finish'];
-    $duration = $fields['duration'];
-    if ($duration) {
-      $minutes = ttTimeHelper::postedDurationToMinutes($duration);
-      $duration = ttTimeHelper::minutesToDuration($minutes);
-    }
-    $note = $fields['note'];
-
-    $billable_part = '';
+    $audit = new ttAuditedChange("tt_log", $user);
+    $tt_log = ttTimeHelper::map($fields, $user);
     if ($user->isPluginEnabled('iv')) {
-      $billable_part = $fields['billable'] ? ', billable = 1' : ', billable = 0';
+      $tt_log['billable'] = isset($fields['billable']) ? '1' : '0';
     }
-    $paid_part = '';
     if ($user->can('manage_invoices') && $user->isPluginEnabled('ps')) {
-      $paid_part = $fields['paid'] ? ', paid = 1' : ', paid = 0';
+      $tt_log['paid'] = isset($fields['paid']) ? '1' : '0';
     }
-    $modified_part = ', modified = now(), modified_ip = ' . $mdb2->quote($_SERVER['REMOTE_ADDR']) . ', modified_by = ' . $mdb2->quote($user->id);
-
-    $start = ttTimeHelper::to24HourFormat($start);
-    $finish = ttTimeHelper::to24HourFormat($finish);
-    if ('00:00' == $finish) $finish = '24:00';
-
-    if ($start) $duration = '';
-
-    if ($duration) {
-      $sql = "UPDATE tt_log set start = NULL, duration = '$duration', client_id = " . $mdb2->quote($client) . ", project_id = " . $mdb2->quote($project) . ", task_id = " . $mdb2->quote($task) . ", " .
-        "comment = " . $mdb2->quote($note) . "$billable_part $paid_part $modified_part, date = '$date' WHERE id = $id";
-      $affected = $mdb2->exec($sql);
-      if (is_a($affected, 'PEAR_Error'))
-        return false;
-    } else {
-      $duration = ttTimeHelper::toDuration($start, $finish);
-      if ($duration === false)
-        $duration = 0;
-      $uncompleted = ttTimeHelper::getUncompleted($user_id);
-      if (!$duration && $uncompleted && ($uncompleted['id'] != $id))
-        return false;
-
-      $sql = "UPDATE tt_log SET start = '$start', duration = '$duration', client_id = " . $mdb2->quote($client) . ", project_id = " . $mdb2->quote($project) . ", task_id = " . $mdb2->quote($task) . ", " .
-        "comment = " . $mdb2->quote($note) . "$billable_part $paid_part $modified_part, date = '$date' WHERE id = $id";
-      $affected = $mdb2->exec($sql);
-      if (is_a($affected, 'PEAR_Error'))
-        return false;
-    }
-    return true;
+    $tt_log['modified'] = date_create('now')->format('Y-m-d H:i:s'); // mysql date format
+    $tt_log['modified_ip'] = $audit->quote($_SERVER['REMOTE_ADDR']);
+    $tt_log['modified_by'] = $user->id;
+    $keys = array("id" => $fields['id']);
+    $result = $audit->update($tt_log, $keys);
+    return $result;
   }
 
   // delete - deletes a record from tt_log table and its associated custom field values.
@@ -785,5 +693,48 @@ class ttTimeHelper
     } else return false;
 
     return $result;
+  }
+
+  private static function map($fields, $user)
+  {
+    $tt_log = [];
+    $tt_log['user_id'] = (int)$fields['user_id'];
+    $tt_log['group_id'] = (int)$fields['group_id'];
+    $tt_log['date'] = $fields['date'];
+    $duration = isset($fields['duration']) ? $fields['duration'] : "";
+    // if duration is set, convert it to minutes
+    if ($duration) {
+      $minutes = ttTimeHelper::postedDurationToMinutes($fields['duration']);
+      $tt_log['duration'] = ttTimeHelper::minutesToDuration($minutes);
+    } else {
+      // convert start and finish to duration and start
+      $start = ttTimeHelper::to24HourFormat($fields['start']);
+      $finish = isset($fields['finish']) ? $fields['finish'] : "";
+
+      if ($finish) {
+        $finish = ttTimeHelper::to24HourFormat($finish);
+        if ('00:00' == $finish) $finish = '24:00';
+      }
+
+      $duration = ttTimeHelper::toDuration($start, $finish);
+      if ($duration === false) $duration = 0;
+      if (!$duration && ttTimeHelper::getUncompleted($user_id)) return false;
+
+      $tt_log['duration'] = $duration;
+      $tt_log['start'] = $start;
+    }
+    $tt_log['client_id'] = $fields['client'];
+    $tt_log['project_id'] = $fields['project'];
+    $tt_log['task_id'] = $fields['task'];
+    $tt_log['invoice_id'] = $fields['invoice'];
+    $tt_log['billable'] = $fileds['billable'];
+    $tt_log['paid'] = $fields['paid'];
+    $tt_log['comment'] = $fields['note'];
+
+    if (array_key_exists('status', $fields)) { // Key exists and may be NULL during migration of data.
+      $tt_log['status'] = $fields['status'];
+    }
+
+    return $tt_log;
   }
 }
